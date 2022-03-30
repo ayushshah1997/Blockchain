@@ -2,12 +2,11 @@ package com.example.blockchain;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.ArrayList;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class MerkleTree {
 
-  private MessageDigest digest = MessageDigest.getInstance("SHA-256");
   private List<Transaction> txnQueue;
 
   public List<Transaction> getTxnQueue() {
@@ -22,7 +21,8 @@ public class MerkleTree {
     this.txnQueue = txnQueue;
   }
 
-  public InternalNode createMerkleTree() {
+  public InternalNode createMerkleTree() throws NoSuchAlgorithmException {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
     int n = this.txnQueue.size();
     InternalNode[] treeNodes = new InternalNode[n];
     for (int i = 0; i < n; i++) {
@@ -41,7 +41,8 @@ public class MerkleTree {
             rightChild,
             combineTwoHashes(
               leftChild.getHashValue(),
-              rightChild.getHashValue()
+              rightChild.getHashValue(),
+              digest
             )
           );
         leftChild.setParent(treeNodes[i / 2]);
@@ -52,9 +53,11 @@ public class MerkleTree {
     return treeNodes[0];
   }
 
-  private byte[] combineTwoHashes(byte[] hash1, byte[] hash2) {
-    return digest.digest(
-      (hash1.toString() + hash2.toString()).getBytes(StandardCharsets.UTF_8)
-    );
+  private byte[] combineTwoHashes(
+    String hash1,
+    String hash2,
+    MessageDigest digest
+  ) {
+    return digest.digest((hash1 + hash2).getBytes(StandardCharsets.UTF_8));
   }
 }

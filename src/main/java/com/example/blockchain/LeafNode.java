@@ -12,8 +12,9 @@ public class LeafNode extends InternalNode {
         this.txn = txn;
     }
 
-    public LeafNode(Transaction txn, String hashValue) {
+    public LeafNode(Transaction txn, byte[] hashValue) {
         super();
         this.txn = txn;
+        this.setHashValue(hashValue);
     }
 }
