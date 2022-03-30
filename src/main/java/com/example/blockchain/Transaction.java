@@ -1,13 +1,9 @@
 package com.example.blockchain;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.Timestamp;
-import java.util.Scanner;
+
 //import javax.xml.bind.DatatypeConverter;
 
 public class Transaction {
@@ -34,24 +30,26 @@ public class Transaction {
 
     }
 
-    //driver code
-    public static void main(String args[]) throws Exception {
-        String input = "Java is an" + "object-oriented language";
+    // driver code
+    // public static void main(String args[]) throws Exception {
+    //     String input = "Java is an" + "object-oriented language";
 
-        byte[] sig = createDigitalSignature(input.getBytes(), senderPvtKey);
-        //System.out.println("Signature Value:\n " + DatatypeConverter.printHexBinary(sig));
-        System.out.println("Verification: "+ verifyDigitalSignature(input.getBytes(), sig, senderPubKey));
-    }
+    //     byte[] sig = createDigitalSignature(input.getBytes(), senderPvtKey);
+    //     // System.out.println("Signature Value:\n " +
+    //     // DatatypeConverter.printHexBinary(sig));
+    //     System.out.println("Verification: " + verifyDigitalSignature(input.getBytes(), sig, senderPubKey));
+    // }
 
-    public static byte[] createDigitalSignature(byte[] input, PrivateKey Key) throws Exception {
+    public byte[] createDigitalSignature(byte[] input, PrivateKey Key) throws Exception {
         Signature sig = Signature.getInstance(SIGNING_ALGORITHM);
         sig.initSign(Key);
         sig.update(input);
         return sig.sign();
     }
 
-    //function verifies the signature by using the public key
-    public static boolean verifyDigitalSignature(byte[] input, byte[] signatureToVerify, PublicKey key) throws Exception {
+    // function verifies the signature by using the public key
+    public boolean verifyDigitalSignature(byte[] input, byte[] signatureToVerify, PublicKey key)
+            throws Exception {
         Signature sig = Signature.getInstance(SIGNING_ALGORITHM);
         sig.initVerify(key);
         sig.update(input);
