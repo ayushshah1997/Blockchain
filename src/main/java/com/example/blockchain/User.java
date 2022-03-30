@@ -14,13 +14,15 @@ public class User {
 
   private PublicKey pubKey;
   private PrivateKey pvtKey;
+  private double balance;
 
-  public User() {
+  public User(double balance) {
     KeyPair kp;
     try {
       kp = generateRSAKeyPair();
-      pubKey = kp.getPublic();
-      pvtKey = kp.getPrivate();
+      this.pubKey = kp.getPublic();
+      this.pvtKey = kp.getPrivate();
+      this.balance = balance;
     } catch (Exception e) {
       System.out.println("Could not generate key pair");
       e.printStackTrace();
@@ -28,7 +30,7 @@ public class User {
   }
 
   public PublicKey getPubKey() {
-    return pubKey;
+    return this.pubKey;
   }
 
   public void setPubKey(PublicKey pubKey) {
@@ -36,11 +38,15 @@ public class User {
   }
 
   public PrivateKey getPvtKey() {
-    return pvtKey;
+    return this.pvtKey;
   }
 
-  public void setPvtKey(PrivateKey pvtKey) {
-    this.pvtKey = pvtKey;
+  public double getBalance() {
+    return this.balance;
+  }
+
+  public void setBalance(double balance) {
+    this.balance = balance;
   }
 
   public static KeyPair generateRSAKeyPair() throws Exception {
