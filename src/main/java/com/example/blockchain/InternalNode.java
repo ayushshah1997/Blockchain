@@ -1,24 +1,24 @@
 package com.example.blockchain;
 
 public class InternalNode {
+
     private InternalNode parent;
     private InternalNode leftChild;
     private InternalNode rightChild;
-    private String hashValue;
+    private byte[] hashValue;
 
     public InternalNode() {
         this.parent = null;
         this.leftChild = null;
         this.rightChild = null;
-        this.hashValue = "";
+        this.hashValue = null;
     }
 
     public InternalNode(
-            InternalNode parent,
             InternalNode leftChild,
             InternalNode rightChild,
-            String hashValue) {
-        this.parent = parent;
+            byte[] hashValue
+    ) {
         this.leftChild = leftChild;
         this.rightChild = rightChild;
         this.hashValue = hashValue;
@@ -49,10 +49,11 @@ public class InternalNode {
     }
 
     public String getHashValue() {
-        return this.hashValue;
+        return this.hashValue.toString();
     }
 
-    public void setHashValue(String hashValue) {
+    public void setHashValue(byte[] hashValue) {
         this.hashValue = hashValue;
     }
 }
+
