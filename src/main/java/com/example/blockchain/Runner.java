@@ -1,8 +1,5 @@
 package com.example.blockchain;
 
-import java.security.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class Runner implements Runnable{
@@ -54,7 +51,7 @@ public class Runner implements Runnable{
                     temp.add(miningNodes[j]);
                 }
             }
-            miningNodes[i].setNeigbours(temp);
+            miningNodes[i].setNeighbours(temp);
         }
     }
 
@@ -64,7 +61,7 @@ public class Runner implements Runnable{
     }
 
 
-    // Generate transaction at fixed interval
+    // Generate transaction at fixed interval - Done
     // Pass transaction via gossip to nodes
     // Multithread and nodes process transaction
     // Monitor growth in blockchain size
@@ -73,7 +70,7 @@ public class Runner implements Runnable{
             @Override
             public void run(){
                 // Generate Trxn
-                for(int i=0; i<100; i++){
+                for(int i=0; i<100; i++) {
                     int u1Idx = r.nextInt(100);
                     User u1 = users[u1Idx];
                     User u2 = users[( u1Idx + r.nextInt(99))%100];
@@ -86,6 +83,8 @@ public class Runner implements Runnable{
                 }
             }
         },0,3000);
+
+
     }
 
     @Override

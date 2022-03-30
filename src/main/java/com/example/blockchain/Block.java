@@ -9,6 +9,7 @@ public class Block {
     private String hash;
     private String previousHash;
     private String data;
+    private MerkleTree merkleTree;
     private long timeStamp;
     private int nonce=10;
 
