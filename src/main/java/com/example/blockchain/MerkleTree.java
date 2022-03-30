@@ -27,24 +27,20 @@ public class MerkleTree {
     InternalNode[] treeNodes = new InternalNode[n];
     for (int i = 0; i < n; i++) {
       byte[] hashValue = digest.digest(
-        this.txnQueue.get(i).toString().getBytes(StandardCharsets.UTF_8)
-      );
+          this.txnQueue.get(i).toString().getBytes(StandardCharsets.UTF_8));
       treeNodes[i] = new LeafNode(this.txnQueue.get(i), hashValue);
     }
     while (n > 1) {
       for (int i = 0; i < n; i += 2) {
         InternalNode leftChild = treeNodes[i];
         InternalNode rightChild = treeNodes[i + 1];
-        treeNodes[i / 2] =
-          new InternalNode(
+        treeNodes[i / 2] = new InternalNode(
             leftChild,
             rightChild,
             combineTwoHashes(
-              leftChild.getHashValue(),
-              rightChild.getHashValue(),
-              digest
-            )
-          );
+                leftChild.getHashValue(),
+                rightChild.getHashValue(),
+                digest));
         leftChild.setParent(treeNodes[i / 2]);
         rightChild.setParent(treeNodes[i / 2]);
       }
@@ -53,11 +49,35 @@ public class MerkleTree {
     return treeNodes[0];
   }
 
+  public boolean validateMerkleHash(InternalNode root) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      if (root.getLeftChild() != null && root.getRightChild() != null) {
+        if (root.getHashValue()
+            .equals(combineTwoHashes(root.getLeftChild().getHashValue(), root.getRightChild().getHashValue(), digest)
+                .toString())) {
+          return validateMerkleHash(root.getLeftChild()) && validateMerkleHash(root.getRightChild());
+        }
+        return false;
+      } else {
+        LeafNode temp = (LeafNode) root;
+        try {
+          return temp.getTransaction().verifyDigitalSignature(null, null, null);
+        } catch (Exception e) {
+          e.printStackTrace();
+          return false;
+        }
+      }
+
+    } catch (NoSuchAlgorithmException e) {
+      return false;
+    }
+  }
+
   private byte[] combineTwoHashes(
-    String hash1,
-    String hash2,
-    MessageDigest digest
-  ) {
+      String hash1,
+      String hash2,
+      MessageDigest digest) {
     return digest.digest((hash1 + hash2).getBytes(StandardCharsets.UTF_8));
   }
 }

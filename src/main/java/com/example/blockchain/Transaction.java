@@ -31,16 +31,16 @@ public class Transaction {
     }
 
     // driver code
-    public static void main(String args[]) throws Exception {
-        String input = "Java is an" + "object-oriented language";
+    // public static void main(String args[]) throws Exception {
+    //     String input = "Java is an" + "object-oriented language";
 
-        byte[] sig = createDigitalSignature(input.getBytes(), senderPvtKey);
-        // System.out.println("Signature Value:\n " +
-        // DatatypeConverter.printHexBinary(sig));
-        System.out.println("Verification: " + verifyDigitalSignature(input.getBytes(), sig, senderPubKey));
-    }
+    //     byte[] sig = createDigitalSignature(input.getBytes(), senderPvtKey);
+    //     // System.out.println("Signature Value:\n " +
+    //     // DatatypeConverter.printHexBinary(sig));
+    //     System.out.println("Verification: " + verifyDigitalSignature(input.getBytes(), sig, senderPubKey));
+    // }
 
-    public static byte[] createDigitalSignature(byte[] input, PrivateKey Key) throws Exception {
+    public byte[] createDigitalSignature(byte[] input, PrivateKey Key) throws Exception {
         Signature sig = Signature.getInstance(SIGNING_ALGORITHM);
         sig.initSign(Key);
         sig.update(input);
@@ -48,7 +48,7 @@ public class Transaction {
     }
 
     // function verifies the signature by using the public key
-    public static boolean verifyDigitalSignature(byte[] input, byte[] signatureToVerify, PublicKey key)
+    public boolean verifyDigitalSignature(byte[] input, byte[] signatureToVerify, PublicKey key)
             throws Exception {
         Signature sig = Signature.getInstance(SIGNING_ALGORITHM);
         sig.initVerify(key);
