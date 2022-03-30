@@ -30,6 +30,10 @@ public class Transaction {
     private static final String SIGNING_ALGORITHM = "SHA256withRSA";
     private static final String RSA = "RSA";
 
+    public Transaction() {
+
+    }
+
     //driver code
     public static void main(String args[]) throws Exception {
         String input = "Java is an" + "object-oriented language";
