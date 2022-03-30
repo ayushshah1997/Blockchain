@@ -15,12 +15,12 @@ public class Transaction {
     private static String senderAddress; // Hash of public key
     private static String payeeAddress;
     private static double amount;
-    private static Timestamp timestamp;
+    private static long timestamp;
     private static Signature sign;
     private static PrivateKey senderPvtKey;
     private static PublicKey senderPubKey;
 
-    public Transaction(User sender, String payee, Timestamp time, double amt) {
+    public Transaction(User sender, String payee, long time, double amt) {
         senderPvtKey = sender.getPvtKey();
         senderPubKey = sender.getPubKey();
         timestamp = time;

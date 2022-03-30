@@ -80,10 +80,7 @@ public class Runner implements Runnable{
 
                     Date date = new Date();
 
-                    // getting the object of the Timestamp class
-                    Timestamp ts = new Timestamp(date.getTime());
-
-                    Transaction temp = new Transaction(u1, u2.getPubKey().toString(), ts, r.nextDouble());
+                    Transaction temp = new Transaction(u1, u2.getPubKey().toString(), date.getTime(), r.nextDouble());
 
                     miningNodes[i].listeningPort(temp);
                 }
