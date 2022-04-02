@@ -101,4 +101,8 @@ public class Runner implements Runnable {
      *
      */
 
+
+    public static void runMiningSharded() {
+
+    }
 }

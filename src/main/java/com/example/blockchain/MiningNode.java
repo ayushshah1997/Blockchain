@@ -1,5 +1,7 @@
 package com.example.blockchain;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.List;
 public class MiningNode {
 
     List<MiningNode> neigbours;
-    List<Transaction> trxnBuffer = new ArrayList<Transaction>();
+    List<Transaction> trxnBuffer = new ArrayList<>();
     HashMap<String, Block> hashToBlock = new HashMap<>();
 
     public static int nonce = 10;
@@ -22,14 +24,24 @@ public class MiningNode {
 
     public static void main(String args[]) {}
 
-    public void findNonce() throws NoSuchAlgorithmException {
+    public void findNonce() throws NoSuchAlgorithmException, UnsupportedEncodingException {
         long n = 0;
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
+        String prevHash = "";
+        String merkleRootHash = "";
         while(true) {
+            String temp =prevHash + merkleRootHash + n;
+            String hashValue = new String(digest.digest(temp.getBytes("UTF-16")));
 
+            if(hashValue.startsWith("00000000000")){
+                break;
+            }
             n++;
         }
+
+        //Block b = new Block();
+        broadcastBlock(b);
     }
 
     public void listeningPort(Transaction t) {
@@ -59,6 +71,8 @@ public class MiningNode {
     }
 
     public void broadcastBlock(Block b) {
-
+        for (MiningNode mn : neigbours) {
+            mn.listenBlock(b);
+        }
     }
 }

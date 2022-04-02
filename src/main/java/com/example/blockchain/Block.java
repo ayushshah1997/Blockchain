@@ -9,12 +9,13 @@ public class Block {
     private String hash;
     private String previousHash;
     private String data;
+    private long nonceValue;
     private MerkleTree merkleTree;
     private long timeStamp;
     private int nonce=10;
 
-    public Block(String data, String previousHash, long timeStamp) {
-        this.data = data;
+    public Block(MerkleTree merkleTree, String previousHash, long timeStamp) {
+        this.merkleTree = merkleTree;
         this.previousHash = previousHash;
         this.timeStamp = timeStamp;
         hash=calculateBlockHash();
