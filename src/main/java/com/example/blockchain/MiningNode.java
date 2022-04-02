@@ -23,16 +23,6 @@ public class MiningNode {
     public static void main(String args[]) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         long t = 0;
 
-
-
-//        System.out.println(checkByte("00".getBytes("UTF-16"), 4));
-//        System.out.println(checkByte("a0".getBytes("UTF-16"), 4));
-//        System.out.println(checkByte("0a".getBytes("UTF-16"), 4));
-//        System.out.println(checkByte("00".getBytes("UTF-16"), 4));
-//        System.out.println(checkByte("00a".getBytes("UTF-16"), 4));
-//        System.out.println(checkByte("00b".getBytes("UTF-16"), 4));
-
-
         for (int i =0; i < 30; i++) {
             t += findNonce("c7b6r87r487r487", "ewcy32i8y4398tvby89c4n23");
             System.out.println(t);
@@ -66,7 +56,6 @@ public class MiningNode {
     public static boolean checkByte(byte[] buffer, int nonce) {
         boolean rtn = true;
         for(int i =0; i < nonce; i++) {
-            //System.out.println(buffer[i]);
             if( buffer[i] != 48 ) {
                 rtn = false;
                 break;
