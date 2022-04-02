@@ -40,7 +40,7 @@ public class MiningNode {
             n++;
         }
 
-        //Block b = new Block();
+        Block b = new Block();
         broadcastBlock(b);
     }
 
