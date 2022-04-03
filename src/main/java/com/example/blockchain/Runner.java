@@ -13,6 +13,8 @@ public class Runner {
 
     private static User[] users;
 
+    public static int numOfNodes = 20;
+
     private static Random r = new Random();
     /*
      * Runs:
@@ -32,10 +34,13 @@ public class Runner {
             users[i] = new User(1000.0);
         }
 
-        miningNodes = new MiningNode[100];
 
-        for (int i = 0; i < 100; i++) {
-            miningNodes[i] = new MiningNode(i+"");
+        miningNodes = new MiningNode[numOfNodes];
+
+        MiningNode.conensusRecord = new ArrayList<>();
+        for (int i = 0; i < numOfNodes; i++) {
+            miningNodes[i] = new MiningNode(i);
+            MiningNode.conensusRecord.add(false);
         }
 
     }
@@ -62,10 +67,24 @@ public class Runner {
         MerkleTree mt = new MerkleTree(trxns);
         MiningNode.prevBlockHash = prevBlockHash;
         MiningNode.merkleRootHash = mt.rootHash();
+        Date start = new Date();
         for( MiningNode mn: miningNodes) {
             mn.start();
         }
 
+        for (MiningNode mn: miningNodes) {
+            try {
+                mn.join();
+            } catch (InterruptedException e) {
+                System.out.println("Thread interrupted.");
+            }
+        }
+
+        Date end = new Date();
+
+        long dt = end.getTime()-start.getTime();
+
+        System.out.println("Time Taken: " +  dt);
     }
 
 
