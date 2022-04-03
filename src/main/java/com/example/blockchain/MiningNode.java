@@ -14,6 +14,7 @@ public class MiningNode extends Thread {
     public MessageDigest digest;
     public static String prevBlockHash;
     public static String merkleRootHash;
+    public static int DIFFICULTY = 2;
 
     public MiningNode(int minerId) {
         this.minerId = minerId;
@@ -34,9 +35,9 @@ public class MiningNode extends Thread {
 
 
 
-    public static boolean checkByte(byte[] buffer, int nonce) {
+    public static boolean checkByte(byte[] buffer) {
         boolean rtn = true;
-        for(int i =0; i < nonce; i++) {
+        for(int i =0; i < DIFFICULTY; i++) {
             if( buffer[i] != 48 ) {
                 rtn = false;
                 break;
@@ -58,7 +59,7 @@ public class MiningNode extends Thread {
                     e.printStackTrace();
                 }
 
-                if(checkByte(hashValue, 3) && !nounceFound){
+                if(checkByte(hashValue) && !nounceFound){
                     nounceFound = true;
                     broadcastBlock = new Block(merkleRootHash, prevBlockHash, 110001);
                     System.out.println("Nounce found : " +minerId);
@@ -67,10 +68,10 @@ public class MiningNode extends Thread {
                 }
             }
             // Verify Block
-            System.out.println("Checking Consensus : " +minerId);
+            //System.out.println("Checking Consensus : " +minerId);
             conensusRecord.set(minerId, true);
         }
-        System.out.println("Miner "+minerId);
+        //System.out.println("Miner "+minerId);
     }
 
 

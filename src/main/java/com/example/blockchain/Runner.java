@@ -13,7 +13,8 @@ public class Runner {
 
     private static User[] users;
 
-    public static int numOfNodes = 20;
+    public static int numOfNodes = 32;
+    public static int trxnsPerBlock = 128;
 
     private static Random r = new Random();
     /*
@@ -48,15 +49,76 @@ public class Runner {
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
         System.out.println("********* RUN WITHOUT SHARDING *************");
-        long sum = 0;
-        for(int i =0; i < 10; i++){
-            System.out.println("Run Number: " + i);
-            sum += runMining();
+
+        // Table 1
+        MiningNode.DIFFICULTY = 2;
+        int[] trxns = {128,256,1024};
+
+        for(int t : trxns) {
+            trxnsPerBlock = t;
+            long sum = 0;
+            for(int i =0; i < 5; i++){
+                System.out.println("Run Number: " + i);
+                sum += runMining();
+            }
+            System.out.println("********** RUN SUMMARY ***********");
+            System.out.println("Transactions per block: "+ t  );
+            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+            System.out.println("Total time taken for 5 runs: " + sum + " ms" );
         }
-        System.out.println("Avg. time taken: " + sum/10 + " seconds" );
 
-        System.out.println("********* RUN WITHOUT SHARDING *************");
+        MiningNode.DIFFICULTY = 3;
 
+        for(int t : trxns) {
+            trxnsPerBlock = t;
+            long sum = 0;
+            for(int i =0; i < 5; i++){
+                System.out.println("Run Number: " + i);
+                sum += runMining();
+            }
+            System.out.println("********** RUN SUMMARY ***********");
+            System.out.println("Transactions per block: "+ t  );
+            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+            System.out.println("Total time taken for 5 runs: " + sum + " ms" );
+        }
+
+        System.out.println("********* RUN SHARDING *************");
+
+        int[] numOfShards = {8,4,2};
+
+        for(int ns : numOfShards){
+            MiningNode.DIFFICULTY = 2;
+            numOfNodes = 32/ns;
+            for(int t : trxns) {
+                trxnsPerBlock = t;
+                long sum = 0;
+                for(int i =0; i < 5; i++){
+                    System.out.println("Run Number: " + i);
+                    sum += runMining();
+                }
+                System.out.println("********** RUN SUMMARY ***********");
+                System.out.println("Number of shards: "+ ns );
+                System.out.println("Transactions per block: "+ t  );
+                System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+                System.out.println("Total time taken for 5 runs: " + sum + " ms" );
+            }
+
+            MiningNode.DIFFICULTY = 3;
+            numOfNodes = 32/ns;
+            for(int t : trxns) {
+                trxnsPerBlock = t;
+                long sum = 0;
+                for(int i =0; i < 5; i++){
+                    System.out.println("Run Number: " + i);
+                    sum += runMining();
+                }
+                System.out.println("********** RUN SUMMARY ***********");
+                System.out.println("Number of shards: "+ ns );
+                System.out.println("Transactions per block: "+ t  );
+                System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+                System.out.println("Total time taken for 5 runs: " + sum + " ms" );
+            }
+        }
 
     }
 
