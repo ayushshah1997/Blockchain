@@ -47,14 +47,24 @@ public class Runner {
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
-        runMining();
+        System.out.println("********* RUN WITHOUT SHARDING *************");
+        long sum = 0;
+        for(int i =0; i < 10; i++){
+            System.out.println("Run Number: " + i);
+            sum += runMining();
+        }
+        System.out.println("Avg. time taken: " + sum/10 + " seconds" );
+
+        System.out.println("********* RUN WITHOUT SHARDING *************");
+
+
     }
 
     // Generate transaction at fixed interval - Done
     // Pass transaction via gossip to nodes
     // Multithread and nodes process transaction
     // Monitor growth in blockchain size
-    public static void runMining() throws NoSuchAlgorithmException {
+    public static long runMining() throws NoSuchAlgorithmException {
         List<Transaction> trxns = new ArrayList<>();
         for(int i=0; i<256; i++){
             int u1Idx = r.nextInt(100);
@@ -83,8 +93,11 @@ public class Runner {
         Date end = new Date();
 
         long dt = end.getTime()-start.getTime();
+        System.out.println("Number of nodes in network: " + numOfNodes);
+        System.out.println("Time Taken: " +  dt/1000 + " seconds");
 
-        System.out.println("Time Taken: " +  dt);
+        return dt;
+
     }
 
 
