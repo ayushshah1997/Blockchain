@@ -1,8 +1,9 @@
 package com.example.blockchain;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-public class Runner implements Runnable {
+public class Runner {
 
 
     // Google Doc link
@@ -21,9 +22,7 @@ public class Runner implements Runnable {
      * 4. Without Sharding Block Capacity - 2048 txns
      */
 
-    // Import initial static blockchain
     // Create Nodes - Done
-    // Create graph (Adjaicency Matrix) - Done
     // Create Users
     public static void setup() {
 
@@ -34,29 +33,14 @@ public class Runner implements Runnable {
         }
 
         miningNodes = new MiningNode[100];
-        int[][] graphAdjacencyMatrix = new int[100][100];
 
         for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 10; j++) {
-                int idx = r.nextInt(100);
-                if (idx != i) {
-                    graphAdjacencyMatrix[i][idx] = 1;
-                }
-            }
+            miningNodes[i] = new MiningNode(i+"");
         }
 
-        for (int i = 0; i < 100; i++) {
-            List<MiningNode> temp = new ArrayList<>();
-            for (int j = 0; j < 100; j++) {
-                if (graphAdjacencyMatrix[i][j] == 1) {
-                    temp.add(miningNodes[j]);
-                }
-            }
-            miningNodes[i].setNeighbours(temp);
-        }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
         runMining();
     }
@@ -65,30 +49,25 @@ public class Runner implements Runnable {
     // Pass transaction via gossip to nodes
     // Multithread and nodes process transaction
     // Monitor growth in blockchain size
-    public static void runMining() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                // Generate Trxn
-                for(int i=0; i<100; i++){
-                    int u1Idx = r.nextInt(100);
-                    User u1 = users[u1Idx];
-                    User u2 = users[(u1Idx + r.nextInt(99)) % 100];
-
-                    Date date = new Date();
-
-                    Transaction temp = new Transaction(u1, u2.getPubKey().toString(), date.getTime(), r.nextDouble());
-
-                    miningNodes[i].listeningPort(temp);
-                }
-            }
-        },0,3000);
-    }
-
-    @Override
-    public void run() {
+    public static void runMining() throws NoSuchAlgorithmException {
+        List<Transaction> trxns = new ArrayList<>();
+        for(int i=0; i<256; i++){
+            int u1Idx = r.nextInt(100);
+            User u1 = users[u1Idx];
+            User u2 = users[(u1Idx + r.nextInt(99)) % 100];
+            Date date = new Date();
+            trxns.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), r.nextDouble()));
+        }
+        String  prevBlockHash = "aaavnuvnreunr98n89f34nCN(E#E#E(";
+        MerkleTree mt = new MerkleTree(trxns);
+        MiningNode.prevBlockHash = prevBlockHash;
+        MiningNode.merkleRootHash = mt.rootHash();
+        for( MiningNode mn: miningNodes) {
+            mn.start();
+        }
 
     }
+
 
 
     /*

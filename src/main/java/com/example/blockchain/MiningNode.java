@@ -1,13 +1,31 @@
 package com.example.blockchain;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Timestamp;
 import java.util.*;
 
-public class MiningNode {
+public class MiningNode extends Thread {
+
+    private String minerId;
+    public static List<Boolean> conensusRecord = new ArrayList<>();
+    public static boolean nounceFound = false;
+    public static Block broadcastBlock;
+    public static MessageDigest digest;
+    public static String prevBlockHash;
+    public static String merkleRootHash;
+
+    public MiningNode(String minerId) {
+        this.minerId = minerId;
+    }
+
+    static {
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
 
     List<MiningNode> neigbours;
     List<Transaction> trxnBuffer = new ArrayList<>();
@@ -16,9 +34,6 @@ public class MiningNode {
     public static int nonce = 10;
     HashSet<Transaction> seen = new HashSet<>();
 
-    public void setNeighbours(List<MiningNode> neighbours) {
-        this.neigbours = neighbours;
-    }
 
     public static void main(String args[]) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         long t = 0;
@@ -33,7 +48,7 @@ public class MiningNode {
     public static long findNonce(String prevHash, String merkleRootHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         long tStart = new Date().getTime();
         long n = 0;
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
 
         while(true) {
             String temp = prevHash + merkleRootHash + n;
@@ -64,7 +79,7 @@ public class MiningNode {
         return rtn;
     }
 
-    public void listeningPort(Transaction t) {
+    public void listeningPort(Transaction t) throws NoSuchAlgorithmException {
 
         if(!seen.contains(t)){
             trxnBuffer.add(t);
@@ -75,24 +90,44 @@ public class MiningNode {
             MerkleTree mt = new MerkleTree(trxnBuffer);
             trxnBuffer = new ArrayList<>();
         }
-        broadcastTransaction(t);
+        //broadcastTransaction(t);
         // Find nonce
 
     }
 
-    public void broadcastTransaction(Transaction t) {
-        for (MiningNode mn : neigbours) {
-            mn.listeningPort(t);
+//    public void broadcastTransaction(Transaction t) {
+//        for (MiningNode mn : neigbours) {
+//            mn.listeningPort(t);
+//        }
+//    }
+//
+//    public void listenBlock(Block b){
+//
+//    }
+//
+//    public void broadcastBlock(Block b) {
+//        for (MiningNode mn : neigbours) {
+//            mn.listenBlock(b);
+//        }
+//    }
+
+    @Override
+    public void run() {
+
+        while (!checkConsensus()) {
+            while(!nounceFound) {
+
+            }
         }
     }
 
-    public void listenBlock(Block b){
 
-    }
 
-    public void broadcastBlock(Block b) {
-        for (MiningNode mn : neigbours) {
-            mn.listenBlock(b);
+    public boolean checkConsensus() {
+        int count = 0;
+        for(boolean b : conensusRecord){
+            if(b) count++;
         }
+        return count>50;
     }
 }

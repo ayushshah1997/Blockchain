@@ -17,8 +17,9 @@ public class MerkleTree {
     this.txnQueue = txnQueue;
   }
 
-  public MerkleTree(List<Transaction> txnQueue) {
+  public MerkleTree(List<Transaction> txnQueue) throws NoSuchAlgorithmException {
     this.txnQueue = txnQueue;
+    createMerkleTree();
   }
 
   public InternalNode createMerkleTree() throws NoSuchAlgorithmException {
@@ -79,5 +80,9 @@ public class MerkleTree {
       String hash2,
       MessageDigest digest) {
     return digest.digest((hash1 + hash2).getBytes(StandardCharsets.UTF_8));
+  }
+
+  public String rootHash() {
+    return "AMDSNJCNDSNNDI";
   }
 }

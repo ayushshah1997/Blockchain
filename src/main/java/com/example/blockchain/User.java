@@ -8,10 +8,6 @@ import java.security.SecureRandom;
 
 public class User {
 
-  public static void main(String[] args) {
-    System.out.println("Hello world!");
-  }
-
   private PublicKey pubKey;
   private PrivateKey pvtKey;
   private double balance;
@@ -24,7 +20,6 @@ public class User {
       this.pvtKey = kp.getPrivate();
       this.balance = balance;
     } catch (Exception e) {
-      System.out.println("Could not generate key pair");
       e.printStackTrace();
     }
   }
