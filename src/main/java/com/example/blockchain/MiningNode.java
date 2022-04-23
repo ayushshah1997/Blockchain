@@ -86,7 +86,9 @@ public class MiningNode extends Thread {
             }
 
             // Verify Block
-            merkleTree.validateMerkleHash(merkleTree.rootNode);
+            if(!merkleTree.validateMerkleHash(merkleTree.rootNode)) {
+                //System.out.println("**************   FALSE   **************");
+            }
             conensusRecord.set(minerId, true);
         }
     }
