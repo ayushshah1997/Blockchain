@@ -143,8 +143,7 @@ public class Runner {
             User u2 = users[(u1Idx + random.nextInt(99)) % 100];
             Date date = new Date();
             byte[] input=("transaction"+i).getBytes();
-            PrivateKey privKey=u1.getPvtKey();
-            transactions.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), random.nextDouble(),input,privKey));
+            transactions.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), random.nextDouble(),input,u1.getPvtKey()));
         }
         return transactions;
     }
