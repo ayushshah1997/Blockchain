@@ -3,3 +3,6 @@ build
 .idea
 .gradle
 gradle
+*.bin
+*.lock
+*.jar
