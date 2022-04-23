@@ -7,43 +7,41 @@ import java.util.*;
 
 public class MiningNode extends Thread {
 
-    private int minerId;
     public static List<Boolean> conensusRecord;
-    public static boolean nounceFound = false;
-    public MerkleTree mkt;
+    public static boolean nonceFound = false;
     public static Block broadcastBlock;
+    public static Block[] shardsBroadcastBlock;
+    public static boolean[][] shardsConsensus;
+    public static boolean[] shardsNonceFound;
 
-    public MerkleTree getMkt() {
-        return mkt;
+    private int minerId;
+    public MerkleTree merkleTree;
+    public boolean shardedRun = false;
+    public int shardIndex;
+    public int nodeIndex;
+
+    public MerkleTree getMerkleTree() {
+        return merkleTree;
     }
 
-    public void setMkt(MerkleTree mkt) {
-        this.mkt = mkt;
+    public void setMerkleTree(MerkleTree mkt) {
+        this.merkleTree = mkt;
     }
 
     public MessageDigest digest;
-    public static String prevBlockHash;
+    public static String prevBlockHash = "fa7e972c41aaf15c57925a21dbcdb1525ab522f6b4b915099dbd8c0c340d8b85";
     public static String merkleRootHash;
     public static int DIFFICULTY = 2;
 
     public MiningNode(int minerId, MerkleTree mt) {
         this.minerId = minerId;
-        this.mkt = mt;
+        this.merkleTree = mt;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
-
-
-    List<MiningNode> neigbours;
-    List<Transaction> trxnBuffer = new ArrayList<>();
-    HashMap<String, Block> hashToBlock = new HashMap<>();
-
-    public static int nonce = 10;
-    HashSet<Transaction> seen = new HashSet<>();
-
 
 
     public static boolean checkByte(byte[] buffer) {
@@ -59,9 +57,17 @@ public class MiningNode extends Thread {
 
     @Override
     public void run() {
+        if(shardedRun) {
+            shardedRun();
+        } else {
+            standardRun();
+        }
+    }
+
+    public void standardRun() {
         while (!checkConsensus()) {
             long n = 0;
-            while(!nounceFound) {
+            while(!nonceFound) {
                 String temp = prevBlockHash + merkleRootHash + n;
                 byte[] hashValue = new byte[64];
                 try {
@@ -70,20 +76,47 @@ public class MiningNode extends Thread {
                     e.printStackTrace();
                 }
 
-                if(checkByte(hashValue) && !nounceFound){
-                    nounceFound = true;
+                if(checkByte(hashValue) && !nonceFound) {
+                    nonceFound = true;
                     broadcastBlock = new Block(merkleRootHash, prevBlockHash, 110001);
-                    System.out.println("Nounce found : " +minerId);
+                    System.out.println("Nonce found : " +minerId);
+                } else {
+                    n++;
+                }
+            }
+
+            // Verify Block
+            merkleTree.validateMerkleHash(merkleTree.rootNode);
+            conensusRecord.set(minerId, true);
+        }
+    }
+
+
+    public void shardedRun() {
+        while (!checkShardConsensus(shardIndex)) {
+            long n = 0;
+            while(!shardsNonceFound[shardIndex]) {
+                String temp = prevBlockHash + merkleRootHash + n;
+                byte[] hashValue = new byte[64];
+                try {
+                    hashValue = digest.digest(temp.getBytes("UTF-16"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                if(checkByte(hashValue) && !shardsNonceFound[shardIndex]){
+                    shardsBroadcastBlock[shardIndex] = new Block(merkleRootHash, prevBlockHash, 110001);
+                    shardsNonceFound[shardIndex] = true;
+                    System.out.println("Shard Index : " + shardIndex);
+                    System.out.println("Nonce found : " +n);
                 } else {
                     n++;
                 }
             }
             // Verify Block
-            mkt.validateMerkleHash(mkt.rootNode);
-            //System.out.println("Checking Consensus : " +minerId);
-            conensusRecord.set(minerId, true);
+            merkleTree.validateMerkleHash(merkleTree.rootNode);
+            shardsConsensus[shardIndex][nodeIndex] = true;
         }
-        //System.out.println("Miner "+minerId);
     }
 
 
@@ -94,5 +127,13 @@ public class MiningNode extends Thread {
             if(b) count++;
         }
         return count > ( conensusRecord.size() /2);
+    }
+
+    public boolean checkShardConsensus(int shardIndex) {
+        int count = 0;
+        for(boolean b : shardsConsensus[shardIndex]){
+            if(b) count++;
+        }
+        return count > ( shardsConsensus[shardIndex].length/2 );
     }
 }
