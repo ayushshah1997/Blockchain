@@ -29,7 +29,7 @@ public class MerkleTree {
     int n = this.txnQueue.size();
 
     // Each transaction will be linked to their corresponding parent (internal) node
-    InternalNode[] treeNodes = new InternalNode[n];
+    InternalNode[] prev = new InternalNode[n];
     for (int i = 0; i < n; i++) {
 
       //generating hash value for each transaction
@@ -37,7 +37,7 @@ public class MerkleTree {
           this.txnQueue.get(i).toString().getBytes(StandardCharsets.UTF_8));
 
       // initializing leaf nodes with their corresponding transaction and a hash value
-      treeNodes[i] = new LeafNode(this.txnQueue.get(i), hashValue);
+      prev[i] = new LeafNode(this.txnQueue.get(i), hashValue);
     }
 
     // creating the merkle tree with transactions as the leaf nodes and all the
@@ -46,22 +46,24 @@ public class MerkleTree {
     // in the bottom-up fashion starting with storing the transactions as the leaf nodes and travelling
     // to the top returning the root.
     while (n > 1) {
+      InternalNode[] curr = new InternalNode[n/2];
       for (int i = 0; i < n; i += 2) {
-        InternalNode leftChild = treeNodes[i];
-        InternalNode rightChild = treeNodes[i + 1];
-        treeNodes[i / 2] = new InternalNode(
+        InternalNode leftChild = prev[i];
+        InternalNode rightChild = prev[i + 1];
+        curr[i / 2] = new InternalNode(
             leftChild,
             rightChild,
             combineTwoHashes(
                 leftChild.getHashValue(),
                 rightChild.getHashValue(),
                 digest));
-        leftChild.setParent(treeNodes[i / 2]);
-        rightChild.setParent(treeNodes[i / 2]);
+        leftChild.setParent(curr[i / 2]);
+        rightChild.setParent(curr[i / 2]);
       }
+      prev = curr;
       n /= 2;
     }
-    return treeNodes[0];
+    return prev[0];
   }
 
   public boolean validateMerkleHash(InternalNode root) {
