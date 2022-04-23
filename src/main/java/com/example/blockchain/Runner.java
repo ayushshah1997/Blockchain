@@ -5,7 +5,6 @@ import java.util.*;
 
 public class Runner {
 
-
     // Google Doc link
     // https://docs.google.com/document/d/1Z2VluX6tIUAeKA0D601h_HusLjENXPa9lT1BdDDOWZU/edit?usp=sharing
 
