@@ -13,10 +13,10 @@ public class Runner {
 
     private static User[] users;
 
-    public static int numOfNodes = 32;
+    public static int numOfNodes = 16;
     public static int trxnsPerBlock = 128;
 
-    private static Random r = new Random();
+    private static final Random r = new Random();
     /*
      * Runs:
      * 1. Without Sharding Block Capacity - 256 txns
@@ -40,7 +40,7 @@ public class Runner {
 
         MiningNode.conensusRecord = new ArrayList<>();
         for (int i = 0; i < numOfNodes; i++) {
-            miningNodes[i] = new MiningNode(i);
+            miningNodes[i] = new MiningNode(i, null);
             MiningNode.conensusRecord.add(false);
         }
 
@@ -52,35 +52,14 @@ public class Runner {
 
         // Table 1
         MiningNode.DIFFICULTY = 2;
-        int[] trxns = {128,256,1024};
+        int[] trxns = {256};//{128,256,1024};
 
-        for(int t : trxns) {
-            trxnsPerBlock = t;
-            long sum = 0;
-            for(int i =0; i < 5; i++){
-                System.out.println("Run Number: " + i);
-                sum += runMining();
-            }
-            System.out.println("********** RUN SUMMARY ***********");
-            System.out.println("Transactions per block: "+ t  );
-            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
-            System.out.println("Total time taken for 5 runs: " + sum + " ms" );
-        }
+        runForTrxnSize(trxns);
 
+        /*
         MiningNode.DIFFICULTY = 3;
 
-        for(int t : trxns) {
-            trxnsPerBlock = t;
-            long sum = 0;
-            for(int i =0; i < 5; i++){
-                System.out.println("Run Number: " + i);
-                sum += runMining();
-            }
-            System.out.println("********** RUN SUMMARY ***********");
-            System.out.println("Transactions per block: "+ t  );
-            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
-            System.out.println("Total time taken for 5 runs: " + sum + " ms" );
-        }
+        runForTrxnSize(trxns);
 
         System.out.println("********* RUN SHARDING *************");
 
@@ -120,6 +99,22 @@ public class Runner {
             }
         }
 
+        */
+    }
+
+    private static void runForTrxnSize(int[] trxns) throws NoSuchAlgorithmException {
+        for(int t : trxns) {
+            trxnsPerBlock = t;
+            long sum = 0;
+            //for(int i =0; i < 5; i++){
+                //System.out.println("Run Number: " + i);
+                sum += runMining();
+            //}
+            System.out.println("********** RUN SUMMARY ***********");
+            System.out.println("Transactions per block: "+ t  );
+            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+            System.out.println("Total time taken for 1 run: " + sum + " ms" );
+        }
     }
 
     // Generate transaction at fixed interval - Done
@@ -141,6 +136,7 @@ public class Runner {
         MiningNode.merkleRootHash = mt.rootHash();
         Date start = new Date();
         for( MiningNode mn: miningNodes) {
+            mn.setMkt(mt);
             mn.start();
         }
 

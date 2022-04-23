@@ -9,6 +9,8 @@ public class MerkleTree {
 
   private List<Transaction> txnQueue;
 
+  public InternalNode rootNode;
+
   public List<Transaction> getTxnQueue() {
     return this.txnQueue;
   }
@@ -19,7 +21,7 @@ public class MerkleTree {
 
   public MerkleTree(List<Transaction> txnQueue) throws NoSuchAlgorithmException {
     this.txnQueue = txnQueue;
-    createMerkleTree();
+    this.rootNode = createMerkleTree();
   }
 
   public InternalNode createMerkleTree() throws NoSuchAlgorithmException {

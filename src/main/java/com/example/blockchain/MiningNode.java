@@ -10,14 +10,25 @@ public class MiningNode extends Thread {
     private int minerId;
     public static List<Boolean> conensusRecord;
     public static boolean nounceFound = false;
+    public MerkleTree mkt;
     public static Block broadcastBlock;
+
+    public MerkleTree getMkt() {
+        return mkt;
+    }
+
+    public void setMkt(MerkleTree mkt) {
+        this.mkt = mkt;
+    }
+
     public MessageDigest digest;
     public static String prevBlockHash;
     public static String merkleRootHash;
     public static int DIFFICULTY = 2;
 
-    public MiningNode(int minerId) {
+    public MiningNode(int minerId, MerkleTree mt) {
         this.minerId = minerId;
+        this.mkt = mt;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
@@ -68,6 +79,7 @@ public class MiningNode extends Thread {
                 }
             }
             // Verify Block
+            mkt.validateMerkleHash(mkt.rootNode);
             //System.out.println("Checking Consensus : " +minerId);
             conensusRecord.set(minerId, true);
         }
