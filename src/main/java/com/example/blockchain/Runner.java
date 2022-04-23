@@ -1,6 +1,7 @@
 package com.example.blockchain;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.*;
 
 public class Runner {
@@ -156,7 +157,9 @@ public class Runner {
             User u1 = users[u1Idx];
             User u2 = users[(u1Idx + random.nextInt(99)) % 100];
             Date date = new Date();
-            transactions.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), random.nextDouble()));
+            byte[] input=("transaction"+i).getBytes();
+            PrivateKey privKey=u1.getPvtKey();
+            transactions.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), random.nextDouble(),input,privKey));
         }
         return transactions;
     }

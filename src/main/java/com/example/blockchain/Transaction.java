@@ -72,11 +72,16 @@ public class Transaction {
         Transaction.senderPubKey = senderPubKey;
     }
 
-    public Transaction(User sender, String payee, long time, double amt) {
+    public Transaction(User sender, String payee, long time, double amt,byte[] input, PrivateKey privKey) {
         senderPvtKey = sender.getPvtKey();
         senderPubKey = sender.getPubKey();
         timestamp = time;
         amount = amt;
+        try {
+            sign=createDigitalSignature(input, privKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static final String SIGNING_ALGORITHM = "SHA256withRSA";
