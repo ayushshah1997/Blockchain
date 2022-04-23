@@ -32,10 +32,16 @@ public class Runner {
         users = new User[100];
 
         for (int i = 0; i < users.length; i++) {
+
+            // initializing users with their own public and private keys.
             users[i] = new User(1000.0);
         }
 
-
+        // creating different mining nodes where
+        // each node will be used to mining the incoming block of transaction
+        // and update the consensus record for that corresponding block.
+        // Initially, the consensus status for all the nodes will be set to false
+        // and the merkle root hash will be null
         miningNodes = new MiningNode[numOfNodes];
 
         MiningNode.conensusRecord = new ArrayList<>();
@@ -124,14 +130,25 @@ public class Runner {
     public static long runMining() throws NoSuchAlgorithmException {
         List<Transaction> trxns = new ArrayList<>();
         for(int i=0; i<256; i++){
+
+            // select a random number as an Id for user1
             int u1Idx = r.nextInt(100);
             User u1 = users[u1Idx];
+
+            // next user's id is user1's id + new Id
             User u2 = users[(u1Idx + r.nextInt(99)) % 100];
             Date date = new Date();
+
+            // initializing new transaction with user1 initializing the transaction, user2's public key,
+            // the transaction timestamp and the transaction amount
             trxns.add(new Transaction(u1, u2.getPubKey().toString(), date.getTime(), r.nextDouble()));
         }
         String  prevBlockHash = "aaavnuvnreunr98n89f34nCN(E#E#E(";
+
+        // creating merkle tree to store our transactions
         MerkleTree mt = new MerkleTree(trxns);
+
+
         MiningNode.prevBlockHash = prevBlockHash;
         MiningNode.merkleRootHash = mt.rootHash();
         Date start = new Date();

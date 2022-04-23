@@ -30,16 +30,6 @@ public class Transaction {
 
     }
 
-    // driver code
-    // public static void main(String args[]) throws Exception {
-    //     String input = "Java is an" + "object-oriented language";
-
-    //     byte[] sig = createDigitalSignature(input.getBytes(), senderPvtKey);
-    //     // System.out.println("Signature Value:\n " +
-    //     // DatatypeConverter.printHexBinary(sig));
-    //     System.out.println("Verification: " + verifyDigitalSignature(input.getBytes(), sig, senderPubKey));
-    // }
-
     public byte[] createDigitalSignature(byte[] input, PrivateKey Key) throws Exception {
         Signature sig = Signature.getInstance(SIGNING_ALGORITHM);
         sig.initSign(Key);

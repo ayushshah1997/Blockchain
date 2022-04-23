@@ -8,9 +8,9 @@ public class LeafNode extends InternalNode {
         return this.txn;
     }
 
-    public void setTransaction(Transaction txn) {
-        this.txn = txn;
-    }
+//    public void setTransaction(Transaction txn) {
+//        this.txn = txn;
+//    }
 
     public LeafNode(Transaction txn, byte[] hashValue) {
         super();
