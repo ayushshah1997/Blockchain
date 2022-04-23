@@ -29,7 +29,7 @@ public class MerkleTree {
     int n = this.txnQueue.size();
 
     // Each transaction will be linked to their corresponding parent (internal) node
-    InternalNode[] prev = new InternalNode[n];
+    InternalNode[] merkleNodes = new InternalNode[2 * n - 1];
     for (int i = 0; i < n; i++) {
 
       //generating hash value for each transaction
@@ -37,8 +37,11 @@ public class MerkleTree {
           this.txnQueue.get(i).toString().getBytes(StandardCharsets.UTF_8));
 
       // initializing leaf nodes with their corresponding transaction and a hash value
-      prev[i] = new LeafNode(this.txnQueue.get(i), hashValue);
+      merkleNodes[i] = new LeafNode(this.txnQueue.get(i), hashValue);
     }
+
+    int start1 = 0;
+    int start2 = n;
 
     // creating the merkle tree with transactions as the leaf nodes and all the
     // internal nodes as the parent nodes. Finally, the root node will be returned which will
@@ -46,24 +49,23 @@ public class MerkleTree {
     // in the bottom-up fashion starting with storing the transactions as the leaf nodes and travelling
     // to the top returning the root.
     while (n > 1) {
-      InternalNode[] curr = new InternalNode[n/2];
       for (int i = 0; i < n; i += 2) {
-        InternalNode leftChild = prev[i];
-        InternalNode rightChild = prev[i + 1];
-        curr[i / 2] = new InternalNode(
+        InternalNode leftChild = merkleNodes[start1++];
+        InternalNode rightChild = merkleNodes[start1++];
+        merkleNodes[start2] = new InternalNode(
             leftChild,
             rightChild,
             combineTwoHashes(
                 leftChild.getHashValue(),
                 rightChild.getHashValue(),
                 digest));
-        leftChild.setParent(curr[i / 2]);
-        rightChild.setParent(curr[i / 2]);
+        leftChild.setParent(merkleNodes[start2]);
+        rightChild.setParent(merkleNodes[start2]);
+        start2++;
       }
-      prev = curr;
       n /= 2;
     }
-    return prev[0];
+    return merkleNodes[0];
   }
 
   public boolean validateMerkleHash(InternalNode root) {
