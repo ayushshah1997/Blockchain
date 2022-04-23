@@ -11,13 +11,14 @@ public class Runner {
     public static int numOfNodes = 32;
     public static int trxnsPerBlock;
     public static int NO_OF_SHARDS;
+    public static MerkleTree mt;
     private static final Random random = new Random();
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
 
         // Table 1
-        MiningNode.DIFFICULTY = 3;
+        MiningNode.DIFFICULTY = 2;
         int[] trxns = {128,256,1024};
 
         NO_OF_SHARDS = 4;
@@ -33,19 +34,18 @@ public class Runner {
     public static void setup() {
 
         users = new User[100];
-
         for (int i = 0; i < users.length; i++) {
 
             // initializing users with their own public and private keys.
             users[i] = new User(1000.0);
         }
     }
+
     // creating different mining nodes where
     // each node will be used to mining the incoming block of transaction
     // and update the consensus record for that corresponding block.
     // Initially, the consensus status for all the nodes will be set to false
     // and the merkle root hash will be null
-
     public static void createMiningThreads() {
         miningNodes = new MiningNode[numOfNodes];
         MiningNode.conensusRecord = new ArrayList<>();
@@ -66,13 +66,18 @@ public class Runner {
             for(int i =0; i < numOfRuns; i++) {
                 createMiningThreads();
                 System.out.println("Run Number: " + i);
+                List<Transaction> transactions = generateTransactions();
+                mt = new MerkleTree(transactions);
+                MiningNode.merkleRootHash = mt.rootHash();
+
                 sum += sharding ? runMiningSharded() : runMining();
             }
 
             System.out.println("********** RUN SUMMARY ***********");
-            System.out.println("Transactions per block: "+ t  );
+            System.out.println("Transactions per block: "+ t);
             System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
             System.out.println("Total time taken for " + numOfRuns +"  runs: " + sum + " ms" );
+            System.out.println("************************************");
         }
     }
 
@@ -81,44 +86,21 @@ public class Runner {
     // Multithread and nodes process transaction
     // Monitor growth in blockchain size
     public static long runMining() throws NoSuchAlgorithmException {
-        List<Transaction> trxns = generateTransactions();
-
-        MerkleTree mt = new MerkleTree(trxns);
-        MiningNode.merkleRootHash = mt.rootHash();
         Date start = new Date();
         for( MiningNode mn: miningNodes) {
             mn.setMerkleTree(mt);
             mn.start();
         }
 
-        for (MiningNode mn: miningNodes) {
-            try {
-                mn.join();
-            } catch (InterruptedException e) {
-                System.out.println("Thread interrupted.");
-            }
-        }
-
-        Date end = new Date();
-
-        long dt = end.getTime()-start.getTime();
-        System.out.println("Number of nodes in network: " + numOfNodes);
-        System.out.println("Time Taken: " +  dt + " milli seconds");
-
-        return dt;
-
+        return  joinThreads(start);
     }
 
 
-    public static long runMiningSharded() throws NoSuchAlgorithmException {
+    public static long runMiningSharded() {
 
-        List<Transaction> transactions = generateTransactions();
-
-        MerkleTree mt = new MerkleTree(transactions);
         MiningNode.shardsConsensus = new boolean[NO_OF_SHARDS][numOfNodes/NO_OF_SHARDS];
         MiningNode.shardsNonceFound = new boolean[NO_OF_SHARDS];
         MiningNode.shardsBroadcastBlock = new Block[NO_OF_SHARDS];
-        MiningNode.merkleRootHash = mt.rootHash();
 
         Date start = new Date();
         int idx = 0;
@@ -132,6 +114,10 @@ public class Runner {
             idx++;
         }
 
+        return  joinThreads(start);
+    }
+
+    private static long joinThreads(Date start) {
         for (MiningNode mn: miningNodes) {
             try {
                 mn.join();
@@ -144,8 +130,7 @@ public class Runner {
 
         long dt = end.getTime()-start.getTime();
         System.out.println("Number of nodes in network: " + numOfNodes);
-        System.out.println("Time Taken: " +  dt/1000 + " seconds");
-
+        // System.out.println("Time Taken: " +  dt/1000 + " seconds");
         return dt;
     }
 
