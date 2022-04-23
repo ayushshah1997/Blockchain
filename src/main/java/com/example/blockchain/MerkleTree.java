@@ -9,15 +9,15 @@ public class MerkleTree {
 
   private List<Transaction> txnQueue;
 
+  public List<Transaction> getTxnQueue() {
+    return txnQueue;
+  }
+
+  public void setTxnQueue(List<Transaction> txnQueue) {
+    this.txnQueue = txnQueue;
+  }
+
   public InternalNode rootNode;
-//
-//  public List<Transaction> getTxnQueue() {
-//    return this.txnQueue;
-//  }
-//
-//  public void setTxnQueue(List<Transaction> txnQueue) {
-//    this.txnQueue = txnQueue;
-//  }
 
   public MerkleTree(List<Transaction> txnQueue) throws NoSuchAlgorithmException {
     this.txnQueue = txnQueue;
@@ -83,7 +83,7 @@ public class MerkleTree {
         // at this stage we have found a leaf node since there are no left or right child
         LeafNode temp = (LeafNode) root;
         try {
-          return temp.getTransaction().verifyDigitalSignature(null, null, null);
+          return temp.getTransaction().verifyDigitalSignature(temp.getHashValue().getBytes(), temp.getTransaction().getSign(), temp.getTransaction().getSenderPubKey());
         } catch (Exception e) {
           e.printStackTrace();
           return false;
