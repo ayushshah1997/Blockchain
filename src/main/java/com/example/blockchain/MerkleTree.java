@@ -75,8 +75,8 @@ public class MerkleTree {
       //checking if there are child nodes to be validated
       if (root.getLeftChild() != null && root.getRightChild() != null) {
         if (root.getHashValue()
-            .equals(combineTwoHashes(root.getLeftChild().getHashValue(), root.getRightChild().getHashValue(), digest)
-                .toString())) {
+            .equals(new String(combineTwoHashes(root.getLeftChild().getHashValue(), root.getRightChild().getHashValue(), digest)
+            ))) {
 
           //recursive call to validateMerkleHash with left and right child as the root node
           return validateMerkleHash(root.getLeftChild()) && validateMerkleHash(root.getRightChild());

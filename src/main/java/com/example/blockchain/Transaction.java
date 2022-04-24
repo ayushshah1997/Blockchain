@@ -13,6 +13,7 @@ public class Transaction {
     private static double amount;
     private static long timestamp;
     private static byte[] sign;
+    private static byte[] inputMessage;
     private static PrivateKey senderPvtKey;
     private static PublicKey senderPubKey;
 
@@ -72,11 +73,20 @@ public class Transaction {
         Transaction.senderPubKey = senderPubKey;
     }
 
-    public Transaction(User sender, String payee, long time, double amt,byte[] input, PrivateKey privKey) {
+    public static byte[] getInputMessage() {
+        return inputMessage;
+    }
+
+    public static void setInputMessage(byte[] inputMessage) {
+        Transaction.inputMessage = inputMessage;
+    }
+
+    public Transaction(User sender, String payee, long time, double amt, byte[] input, PrivateKey privKey) {
         senderPvtKey = sender.getPvtKey();
         senderPubKey = sender.getPubKey();
         timestamp = time;
         amount = amt;
+        inputMessage = input;
         try {
             sign=createDigitalSignature(input, privKey);
         } catch (Exception e) {

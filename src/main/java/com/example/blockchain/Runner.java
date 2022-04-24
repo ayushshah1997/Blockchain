@@ -1,7 +1,6 @@
 package com.example.blockchain;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.util.*;
 
 public class Runner {
@@ -13,29 +12,33 @@ public class Runner {
     public static int NO_OF_SHARDS;
     public static MerkleTree mt;
     private static final Random random = new Random();
+    private static String csv = "";
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
 
-        // Table 1
-        MiningNode.DIFFICULTY = 2;
-        int[] trxns = {128,256,1024};
+        int[] difficulty = {2,3};
+        int[] trxns = {4,256,1024};
 
-        NO_OF_SHARDS = 4;
+        int[] shardSize = {2,4,8};
 
         // STANDARD RUN WITHOUT SHARDING
-        runForTrxnSize(trxns, false);
+        runForTrxnSize(trxns,difficulty, false);
+
+        System.out.println("********** SHARDING RUNS BEGIN ***********");
 
         // RUN WITH SHARDING
-        runForTrxnSize(trxns, true);
-
+        for( int s : shardSize) {
+            NO_OF_SHARDS = s;
+            runForTrxnSize(trxns, difficulty, true);
+        }
+        System.out.println(csv);
     }
 
     public static void setup() {
 
         users = new User[100];
         for (int i = 0; i < users.length; i++) {
-
             // initializing users with their own public and private keys.
             users[i] = new User(1000.0);
         }
@@ -58,26 +61,36 @@ public class Runner {
 
 
 
-    private static void runForTrxnSize(int[] trxns, boolean sharding) throws NoSuchAlgorithmException {
-        for(int t : trxns) {
-            trxnsPerBlock = t;
-            long sum = 0;
-            int numOfRuns = 5;
-            for(int i =0; i < numOfRuns; i++) {
-                createMiningThreads();
-                System.out.println("Run Number: " + i);
-                List<Transaction> transactions = generateTransactions();
-                mt = new MerkleTree(transactions);
-                MiningNode.merkleRootHash = mt.rootHash();
+    private static void runForTrxnSize(int[] trxns, int[] difficulty,  boolean sharding) throws NoSuchAlgorithmException {
+        for(int d : difficulty){
+            MiningNode.DIFFICULTY = d;
+            for(int t : trxns) {
+                trxnsPerBlock = t;
+                long sum = 0;
+                int numOfRuns = 5;
+                for(int i =0; i < numOfRuns; i++) {
+                    createMiningThreads();
+                    System.out.println("Run Number: " + i);
+                    List<Transaction> transactions = generateTransactions();
+                    mt = new MerkleTree(transactions);
+                    MiningNode.merkleRootHash = mt.rootHash();
 
-                sum += sharding ? runMiningSharded() : runMining();
+                    sum += sharding ? runMiningSharded() : runMining();
+                }
+
+                System.out.println("********** RUN SUMMARY ***********");
+                System.out.println("Transactions per block: "+ t);
+                System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
+                System.out.println("Total time taken for " + numOfRuns +"  runs: " + sum + " ms" );
+                System.out.println("************************************");
+
+                if(sharding ){
+                    csv += t +"," + MiningNode.DIFFICULTY+ "," + NO_OF_SHARDS +","+ numOfRuns  +"," + sum + ","+(double)(trxnsPerBlock* 5L /sum) + "\n";
+                } else {
+                    csv += t +"," + MiningNode.DIFFICULTY+ "," + numOfRuns  +"," + sum + ","+(double)(trxnsPerBlock* 5L /sum) + "\n";
+                }
+
             }
-
-            System.out.println("********** RUN SUMMARY ***********");
-            System.out.println("Transactions per block: "+ t);
-            System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
-            System.out.println("Total time taken for " + numOfRuns +"  runs: " + sum + " ms" );
-            System.out.println("************************************");
         }
     }
 
@@ -137,7 +150,7 @@ public class Runner {
 
     private static List<Transaction> generateTransactions() {
         List<Transaction> transactions = new ArrayList<>();
-        for(int i=0; i<256; i++){
+        for(int i=0; i<4; i++){
             int u1Idx = random.nextInt(100);
             User u1 = users[u1Idx];
             User u2 = users[(u1Idx + random.nextInt(99)) % 100];

@@ -49,7 +49,7 @@ public class InternalNode {
     }
 
     public String getHashValue() {
-        return this.hashValue.toString();
+        return new String(this.hashValue);
     }
 
     public void setHashValue(byte[] hashValue) {
