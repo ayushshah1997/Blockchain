@@ -78,8 +78,7 @@ public class MiningNode extends Thread {
 
                 if(checkByte(hashValue) && !nonceFound) {
                     nonceFound = true;
-                    broadcastBlock = new Block(merkleRootHash, prevBlockHash, 110001);
-                    System.out.println("Nonce found : " +minerId);
+                    broadcastBlock = new Block(merkleRootHash, prevBlockHash, new Date().getTime());
                 } else {
                     n++;
                 }
@@ -87,7 +86,6 @@ public class MiningNode extends Thread {
 
             // Verify Block
             merkleTree.validateMerkleHash(merkleTree.rootNode);
-            //System.out.println("**************   FALSE   **************");
             conensusRecord.set(minerId, true);
         }
     }
@@ -108,8 +106,8 @@ public class MiningNode extends Thread {
                 if(checkByte(hashValue) && !shardsNonceFound[shardIndex]){
                     shardsBroadcastBlock[shardIndex] = new Block(merkleRootHash, prevBlockHash, 110001);
                     shardsNonceFound[shardIndex] = true;
-                    System.out.println("Shard Index : " + shardIndex);
-                    System.out.println("Nonce found : " +n);
+                    //System.out.println("Shard Index : " + shardIndex);
+                    //System.out.println("Nonce found : " +n);
                 } else {
                     n++;
                 }

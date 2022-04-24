@@ -18,7 +18,7 @@ public class Runner {
         setup();
 
         int[] difficulty = {2,3};
-        int[] trxns = {4,256,1024};
+        int[] trxns = {128,256,1024};
 
         int[] shardSize = {2,4,8};
 
@@ -74,22 +74,19 @@ public class Runner {
                     List<Transaction> transactions = generateTransactions();
                     mt = new MerkleTree(transactions);
                     MiningNode.merkleRootHash = mt.rootHash();
-
                     sum += sharding ? runMiningSharded() : runMining();
                 }
 
-                System.out.println("********** RUN SUMMARY ***********");
-                System.out.println("Transactions per block: "+ t);
-                System.out.println("Difficulty: " + MiningNode.DIFFICULTY);
-                System.out.println("Total time taken for " + numOfRuns +"  runs: " + sum + " ms" );
-                System.out.println("************************************");
 
                 if(sharding ){
-                    csv += t +"," + MiningNode.DIFFICULTY+ "," + NO_OF_SHARDS +","+ numOfRuns  +"," + sum + ","+(double)(trxnsPerBlock* 5L /sum) + "\n";
+                    String temp = t +"," + MiningNode.DIFFICULTY+ "," + NO_OF_SHARDS +","+ numOfRuns  +"," + sum;
+                    csv +=  temp + "\n";
+                    System.out.println(temp);
                 } else {
-                    csv += t +"," + MiningNode.DIFFICULTY+ "," + numOfRuns  +"," + sum + ","+(double)(trxnsPerBlock* 5L /sum) + "\n";
+                    String temp = t +"," + MiningNode.DIFFICULTY+ "," + numOfRuns  +"," + sum;
+                    csv += temp + "\n";
+                    System.out.println(temp);
                 }
-
             }
         }
     }
