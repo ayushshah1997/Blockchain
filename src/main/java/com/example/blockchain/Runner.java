@@ -19,19 +19,22 @@ public class Runner {
 
         int[] difficulty = {2,3};
         int[] trxns = {128,256,1024};
-
         int[] shardSize = {2,4,8};
 
         // STANDARD RUN WITHOUT SHARDING
         runForTrxnSize(trxns,difficulty, false);
 
-        System.out.println("********** SHARDING RUNS BEGIN ***********");
+        System.out.println("Trxns per block,Difficulty, No. of Runs, Total Time");
+        System.out.println(csv+"\n");
 
+        System.out.println("********** SHARDING RUNS BEGIN ***********");
+        csv = "";
         // RUN WITH SHARDING
         for( int s : shardSize) {
             NO_OF_SHARDS = s;
             runForTrxnSize(trxns, difficulty, true);
         }
+        System.out.println("Trxns per block,Difficulty,No. of Shards, No. of Runs, Total Time");
         System.out.println(csv);
     }
 
@@ -70,7 +73,7 @@ public class Runner {
                 int numOfRuns = 5;
                 for(int i =0; i < numOfRuns; i++) {
                     createMiningThreads();
-                    System.out.println("Run Number: " + i);
+                    //System.out.println("Run Number: " + i);
                     List<Transaction> transactions = generateTransactions();
                     mt = new MerkleTree(transactions);
                     MiningNode.merkleRootHash = mt.rootHash();
@@ -139,8 +142,6 @@ public class Runner {
         Date end = new Date();
 
         long dt = end.getTime()-start.getTime();
-        System.out.println("Number of nodes in network: " + numOfNodes);
-        // System.out.println("Time Taken: " +  dt/1000 + " seconds");
         return dt;
     }
 
