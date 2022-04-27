@@ -14,7 +14,7 @@ public class MiningNode extends Thread {
     public static boolean[][] shardsConsensus;
     public static boolean[] shardsNonceFound;
 
-    private int minerId;
+    private final int minerId;
     public MerkleTree merkleTree;
     public boolean shardedRun = false;
     public int shardIndex;
