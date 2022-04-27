@@ -5,11 +5,21 @@ import java.util.*;
 
 public class Runner {
 
+    // Array to store all mining nodes in the network
     private static MiningNode[] miningNodes;
+
+    // Array to store all users transacting
     private static User[] users;
+
+    // Number of nodes in network
     public static int numOfNodes = 32;
+
+    // Transaction per block
     public static int trxnsPerBlock;
+
+    // Number of shards i.e. sub-networks the network is divided into
     public static int NO_OF_SHARDS;
+
     public static MerkleTree mt;
     private static final Random random = new Random();
     private static String csv = "";
