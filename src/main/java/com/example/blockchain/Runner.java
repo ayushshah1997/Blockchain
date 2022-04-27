@@ -12,17 +12,18 @@ public class Runner {
     private static User[] users;
 
     // Number of nodes in network
-    public static int numOfNodes = 32;
+    public static int NUMBER_OF_NODES = 32;
 
     // Transaction per block
-    public static int trxnsPerBlock;
+    public static int TRANSACTIONS_PER_BLOCK;
 
     // Number of shards i.e. sub-networks the network is divided into
     public static int NO_OF_SHARDS;
 
+    public static double[] throughput = new double[2];
+
     public static MerkleTree mt;
     private static final Random random = new Random();
-    private static String csv = "";
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
@@ -30,28 +31,28 @@ public class Runner {
         // Configuration for Run
         int[] difficulty = {2};
         int[] trxns = {256};
-        int[] shardSize = {2};
+        int[] shardSize = {4};
 
         // STANDARD RUN WITHOUT SHARDING
         System.out.println("********** TRADITIONAL RUN BEGIN ***********");
         runForTrxnSize(trxns,difficulty, false);
 
-        System.out.println("Trxns per block,Difficulty, No. of Runs, Total Time");
-        System.out.println(csv+"\n");
         System.out.println("********** TRADITIONAL RUN ENDS ***********");
 
-        csv = "";
 
-        System.out.println("********** SHARDING RUN BEGIN ***********");
         // RUN WITH SHARDING
         for( int s : shardSize) {
             NO_OF_SHARDS = s;
+            System.out.println("********** SHARDING RUN BEGIN ***********");
+            System.out.println("Number of Shards: "+s);
             runForTrxnSize(trxns, difficulty, true);
         }
 
-        System.out.println("Trxns per block,Difficulty,No. of Shards, No. of Runs, Total Time");
-        System.out.println(csv+"\n");
+
+        //System.out.println(csv+"\n");
         System.out.println("********** SHARDING RUN ENDS ***********");
+
+        System.out.printf("Performance Improvement %.2fx", (throughput[1]/throughput[0]));
 
     }
 
@@ -74,11 +75,11 @@ public class Runner {
     // and the merkle root hash will be null
     public static void createMiningThreads() {
 
-        miningNodes = new MiningNode[numOfNodes];
+        miningNodes = new MiningNode[NUMBER_OF_NODES];
         MiningNode.conensusRecord = new ArrayList<>();
         MiningNode.nonceFound = false;
 
-        for (int i = 0; i < numOfNodes; i++) {
+        for (int i = 0; i < NUMBER_OF_NODES; i++) {
             miningNodes[i] = new MiningNode(i, null);
             MiningNode.conensusRecord.add(false);
         }
@@ -94,7 +95,7 @@ public class Runner {
             MiningNode.DIFFICULTY = d;
             for(int t : transactionsPerBlock) {
 
-                trxnsPerBlock = t;
+                TRANSACTIONS_PER_BLOCK = t;
                 long sum = 0;
 
                 // We run 5 time for a particular combination and take average run time
@@ -106,7 +107,6 @@ public class Runner {
                     // a thread that is completed cannot be reused
                     createMiningThreads();
 
-                    System.out.println("Run Number: " + i);
 
                     // Generate transactions to added to block
                     List<Transaction> transactions = generateTransactions();
@@ -116,21 +116,24 @@ public class Runner {
                     MiningNode.merkleRootHash = mt.rootHash();
 
                     // Run sharded or standard depending on parameter
-                    sum += sharding ? runMiningSharded() : runMining();
+                    long timeTakeForRun = sharding ? runMiningSharded() : runMining();
+
+                    System.out.println("Run Number: " + (i+1) + " completed in "+timeTakeForRun +" ms");
+                     sum += timeTakeForRun;
                 }
 
-
-                // Logging run values to csv format
-                if(sharding ){
-                    String temp = t +"," + MiningNode.DIFFICULTY+ "," + NO_OF_SHARDS +","+ numOfRuns  +"," + sum;
-                    csv +=  temp + "\n";
-                    System.out.println(temp);
+                System.out.println("\n"+"RUN SUMMARY");
+                System.out.println("Transactions per block: " + TRANSACTIONS_PER_BLOCK);
+                System.out.println("Difficulty: " + d);
+                System.out.println("Total Time: " + sum + " ms");
+                System.out.println("Average Run Time: " + sum/5 + " ms");
+                if(sharding) {
+                    throughput[1] = 1.0* TRANSACTIONS_PER_BLOCK * 5000L * NO_OF_SHARDS / sum;
+                    System.out.println("Throughput: " + throughput[1]);
                 } else {
-                    String temp = t +"," + MiningNode.DIFFICULTY+ "," + numOfRuns  +"," + sum;
-                    csv += temp + "\n";
-                    System.out.println(temp);
+                    throughput[0] = 1.0* TRANSACTIONS_PER_BLOCK * 5000L / sum;
+                    System.out.println("Throughput: " + throughput[0]);
                 }
-
             }
         }
     }
@@ -159,7 +162,7 @@ public class Runner {
     public static long runMiningSharded() {
 
         // 2D Array to store consensus [Shard id][Node id in shard]
-        MiningNode.shardsConsensus = new boolean[NO_OF_SHARDS][numOfNodes/NO_OF_SHARDS];
+        MiningNode.shardsConsensus = new boolean[NO_OF_SHARDS][NUMBER_OF_NODES/NO_OF_SHARDS];
         MiningNode.shardsNonceFound = new boolean[NO_OF_SHARDS];
         MiningNode.shardsBroadcastBlock = new Block[NO_OF_SHARDS];
 
@@ -170,8 +173,8 @@ public class Runner {
 
         for( MiningNode mn: miningNodes) {
             mn.shardedRun = true;
-            mn.shardIndex = idx/(numOfNodes/NO_OF_SHARDS);
-            mn.nodeIndex = idx%(numOfNodes/NO_OF_SHARDS);
+            mn.shardIndex = idx/(NUMBER_OF_NODES/NO_OF_SHARDS);
+            mn.nodeIndex = idx%(NUMBER_OF_NODES/NO_OF_SHARDS);
             mn.setMerkleTree(mt);
             mn.start();
             idx++;
@@ -180,6 +183,9 @@ public class Runner {
         return  executeThreads(start);
     }
 
+    /*
+    * Finished executing all threads
+    * */
     private static long executeThreads(Date start) {
 
         //Finish executing all threads before main thread proceeds with next run
