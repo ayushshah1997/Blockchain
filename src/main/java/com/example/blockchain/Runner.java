@@ -17,29 +17,39 @@ public class Runner {
     public static void main(String[] args) throws NoSuchAlgorithmException {
         setup();
 
-        int[] difficulty = {2,3};
-        int[] trxns = {128,256,1024};
-        int[] shardSize = {2,4,8};
+        // Configuration for Run
+        int[] difficulty = {2};
+        int[] trxns = {256};
+        int[] shardSize = {2};
 
         // STANDARD RUN WITHOUT SHARDING
+        System.out.println("********** TRADITIONAL RUN BEGIN ***********");
         runForTrxnSize(trxns,difficulty, false);
 
         System.out.println("Trxns per block,Difficulty, No. of Runs, Total Time");
         System.out.println(csv+"\n");
+        System.out.println("********** TRADITIONAL RUN ENDS ***********");
 
-        System.out.println("********** SHARDING RUNS BEGIN ***********");
         csv = "";
+
+        System.out.println("********** SHARDING RUN BEGIN ***********");
         // RUN WITH SHARDING
         for( int s : shardSize) {
             NO_OF_SHARDS = s;
             runForTrxnSize(trxns, difficulty, true);
         }
+
         System.out.println("Trxns per block,Difficulty,No. of Shards, No. of Runs, Total Time");
-        System.out.println(csv);
+        System.out.println(csv+"\n");
+        System.out.println("********** SHARDING RUN ENDS ***********");
+
     }
 
+    /*
+    * Creating 100 users who will be transacting and those
+    * transactions will added to the block
+    * */
     public static void setup() {
-
         users = new User[100];
         for (int i = 0; i < users.length; i++) {
             // initializing users with their own public and private keys.
@@ -53,34 +63,54 @@ public class Runner {
     // Initially, the consensus status for all the nodes will be set to false
     // and the merkle root hash will be null
     public static void createMiningThreads() {
+
         miningNodes = new MiningNode[numOfNodes];
         MiningNode.conensusRecord = new ArrayList<>();
         MiningNode.nonceFound = false;
+
         for (int i = 0; i < numOfNodes; i++) {
             miningNodes[i] = new MiningNode(i, null);
             MiningNode.conensusRecord.add(false);
         }
     }
 
+    /*
+    * Function performs a block mining for all combinations of transactions per block
+    * and difficulty.
+    * */
+    private static void runForTrxnSize(int[] transactionsPerBlock, int[] difficulty,  boolean sharding) throws NoSuchAlgorithmException {
 
-
-    private static void runForTrxnSize(int[] trxns, int[] difficulty,  boolean sharding) throws NoSuchAlgorithmException {
         for(int d : difficulty){
             MiningNode.DIFFICULTY = d;
-            for(int t : trxns) {
+            for(int t : transactionsPerBlock) {
+
                 trxnsPerBlock = t;
                 long sum = 0;
+
+                // We run 5 time for a particular combination and take average run time
                 int numOfRuns = 5;
+
                 for(int i =0; i < numOfRuns; i++) {
+
+                    // Create mining nodes before every run as
+                    // a thread that is completed cannot be reused
                     createMiningThreads();
-                    //System.out.println("Run Number: " + i);
+
+                    System.out.println("Run Number: " + i);
+
+                    // Generate transactions to added to block
                     List<Transaction> transactions = generateTransactions();
+
+                    // Create merkle tree of the transactions
                     mt = new MerkleTree(transactions);
                     MiningNode.merkleRootHash = mt.rootHash();
+
+                    // Run sharded or standard depending on parameter
                     sum += sharding ? runMiningSharded() : runMining();
                 }
 
 
+                // Logging run values to csv format
                 if(sharding ){
                     String temp = t +"," + MiningNode.DIFFICULTY+ "," + NO_OF_SHARDS +","+ numOfRuns  +"," + sum;
                     csv +=  temp + "\n";
@@ -90,32 +120,42 @@ public class Runner {
                     csv += temp + "\n";
                     System.out.println(temp);
                 }
+
             }
         }
     }
 
-    // Generate transaction at fixed interval - Done
-    // Pass transaction via gossip to nodes
-    // Multithread and nodes process transaction
-    // Monitor growth in blockchain size
-    public static long runMining() throws NoSuchAlgorithmException {
+    /*
+    * Method to run mining for traditional non-sharded blockchain mining
+    * */
+    public static long runMining() {
+
+        // Note run start Date for timestamp
         Date start = new Date();
+
+        // Set merkle tree for each mining node
         for( MiningNode mn: miningNodes) {
             mn.setMerkleTree(mt);
             mn.start();
         }
 
-        return  joinThreads(start);
+        return  executeThreads(start);
     }
 
 
+    /*
+     * Method to run mining for tradition sharded blockchain mining
+     * */
     public static long runMiningSharded() {
 
+        // 2D Array to store consensus [Shard id][Node id in shard]
         MiningNode.shardsConsensus = new boolean[NO_OF_SHARDS][numOfNodes/NO_OF_SHARDS];
         MiningNode.shardsNonceFound = new boolean[NO_OF_SHARDS];
         MiningNode.shardsBroadcastBlock = new Block[NO_OF_SHARDS];
 
+        // Note run start Date for timestamp
         Date start = new Date();
+        
         int idx = 0;
 
         for( MiningNode mn: miningNodes) {
@@ -127,10 +167,12 @@ public class Runner {
             idx++;
         }
 
-        return  joinThreads(start);
+        return  executeThreads(start);
     }
 
-    private static long joinThreads(Date start) {
+    private static long executeThreads(Date start) {
+
+        //Finish executing all threads before main thread proceeds with next run
         for (MiningNode mn: miningNodes) {
             try {
                 mn.join();
@@ -139,13 +181,19 @@ public class Runner {
             }
         }
 
+        // Note run end Date for timestamp
         Date end = new Date();
 
-        long dt = end.getTime()-start.getTime();
-        return dt;
+
+        // Return time taken for run
+        return end.getTime()-start.getTime();
     }
 
 
+    /*
+    * Function to generate random transactions between users.
+    * Used as input to mining node for creating a block.
+    * */
     private static List<Transaction> generateTransactions() {
         List<Transaction> transactions = new ArrayList<>();
         for(int i=0; i<4; i++){
