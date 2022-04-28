@@ -37,7 +37,7 @@ public class Runner {
         NUMBER_OF_NODES = 32; // Number of mining nodes in network
         MiningNode.DIFFICULTY = 2; // PoW difficulty, (2 = first 2 characters in block hash will be 0)
         NUMBER_OF_RUNS = 5; // Number runs to perform for a configuration
-        NO_OF_SHARDS = 4; // Number of shards the network will be divided into
+        NO_OF_SHARDS = 8; // Number of shards the network will be divided into
 
         // STANDARD RUN WITHOUT SHARDING
         System.out.println("********** TRADITIONAL RUN BEGIN ***********");
@@ -53,10 +53,11 @@ public class Runner {
         System.out.println("Number of Shards: " + NO_OF_SHARDS);
         runWithConfigurations(true);
 
-        System.out.println("********** SHARDING RUN ENDS ***********");
+        System.out.println("********** SHARDING RUN ENDS ***********"+"\n");
 
         System.out.printf("Performance Improvement %.2fx", (throughput[1] / throughput[0]));
 
+        System.out.println("\n*********************");
     }
 
     /*
